@@ -34,8 +34,8 @@ void main()
     r2 = sqrt(-delta)/(2*a);
   
     float y2;
-    y1 = a*((r1*r1) +2*(r1*r2) - (r2*r2)) + (b*r1)+(b*r2) + c;
-    y2 = a*((r1*r1) -2*(r1*r2) - (r2*r2)) + (b*r1)+(b*-r2) + c;
+    y1 = a * ((r1*r1) + 2 * (r1*r2) - (r2*r2)) + (b*r1)+(b*r2) + c;
+    y2 = a * ((r1*r1) - 2 * (r1*r2) - (r2*r2)) + (b*r1)+(b*-r2) + c;
 
     printf("As raizes imaginarias da equacao sao (%.2f - %.2fi) e (%.2f + %.2fi)\n",r1,r2,r1,r2);
     printf("Os valores de y sao %.2f e %.2f\n", y1, y2); 
