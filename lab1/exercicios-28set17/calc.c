@@ -16,7 +16,8 @@ int calculo(int n1, char o, int n2)
     case '/':
       resultado = n1 / n2;
       break;
-  }
+  }  
+  return resultado;  
 }
 
 void main()
