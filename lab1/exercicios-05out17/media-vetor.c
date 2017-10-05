@@ -17,5 +17,5 @@ void main()
   {
   	scanf("%f", &v[i]);
   }
-  printf("A media deles e' %f\n", media(v, 5));
+  printf("A media deles e' %f\n", media(v, sizeof(v)/sizeof(v[0])));
 }
