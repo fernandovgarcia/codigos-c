@@ -52,6 +52,68 @@ bool verifica(int tabuleiro[10], int dado)
     return false;
   }	
 }
-int main(){
+int main()
+{
+  int i, j, tabuleiro[10], posicao, dado, resultado = 0, jc = 0, g = 0;
+  bool v;
+  for (j = 0; j < 10; j++){
+    tabuleiro[j] = 0;
+  }
+  int o = 1;
+  srand(time(NULL));
+  while(o > 0) {
+    g = 0;
+    printf("-----RODADA %d-----\n", o);
+    dado = nAleatorio();
+    v = verifica(tabuleiro, dado);
+    printf("O resultado do dado foi: %d\n", dado);
+    if(v == true){
+      printf("O tabuleiro esta assim:\n");
+      imprimeTab(tabuleiro);
 
+      printf("Escolha a posicao que deseja colocar o valor do dado:\n");
+      scanf("%d", &posicao);
+      if(tabuleiro[posicao-1] != 0){
+        printf("PERDEU\nVoce nao pode colocar esse numero nessa posicao\n");
+        break;
+      }
+      for(j = 0; j < posicao-1; j++){
+        if (tabuleiro[j] > dado) {
+          jc++;
+        }
+      }	
+      if (jc == 0) {
+        tabuleiro[posicao-1] = dado;
+      }else{
+        printf("PERDEU\nVoce nao pode colocar esse numero nessa posicao\n");
+        break;
+      }
+      jc = 0;
+      for (j = posicao; j < 10; j++){
+        if (tabuleiro[j] < dado && tabuleiro[j] != 0) {
+          jc++;
+        }
+      }
+      if (jc == 0) {
+        tabuleiro[posicao-1] = dado;
+      }else{
+        printf("PERDEU\nVoce nao pode colocar esse numero nessa posicao\n");
+        break;
+      }
+      for (i = 0; i < 10; i++){
+        if(tabuleiro[i] != 0){
+          g++;
+        }
+      }
+      if (g == 10){
+        imprimeTab(tabuleiro);
+        printf("PARABENS, VOCE GANHOU!!!\n");
+        break;
+      }
+      o++;
+    }else{
+      printf("PERDEU\nNao ha mais movimentos possiveis\n");
+      break;
+    }
+  }
 }
