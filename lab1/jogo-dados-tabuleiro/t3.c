@@ -1,15 +1,19 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
 
-int nAleatorio(){
-	int n;
-	n = ((rand() % 6) + 1);
-	return n;
+int nAleatorio()
+{
+  int n;
+  n = ((rand() % 6) + 1);
+  return n;
 }
-void main(){
-	int i, anterior, tabuleiro[10], num;
-	i = 0;
-	while(i<1){
-		printf("\n");
-	}
+int imprimeTab(int tabuleiro[10])
+{
+  for (int j = 0; j < 10; j++) {
+    printf("Valor na posicao %d: %d\n", j+1, tabuleiro[j]);
+  }
+}
+int main(){
+
 }
