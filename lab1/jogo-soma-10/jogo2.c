@@ -20,6 +20,18 @@ int imprimeTab(int tabuleiro[6][6])
     }
   }
 }
+int limpalinha(int l, int tabuleiro[6][6]){
+  for (int i = 0; i < 6; i++){
+    tabuleiro[l][i] = 0;
+  }
+  return tabuleiro[6][6];
+}
+int limpacoluna(int c, int tabuleiro[6][6]){
+  for (int i = 0; i < 6; i++){
+    tabuleiro[i][c] = 0;
+  }
+  return tabuleiro[6][6];
+}
 int main()
 {
   int i, j, tabuleiro[6][6], l, c, dado, resultado = 0, jc = 0, g = 0;
