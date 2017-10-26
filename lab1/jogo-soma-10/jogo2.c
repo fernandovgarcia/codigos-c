@@ -20,19 +20,22 @@ int imprimeTab(int tabuleiro[6][6])
     }
   }
 }
-int limpalinha(int l, int tabuleiro[6][6]){
+int limpalinha(int l, int tabuleiro[6][6])
+{
   for (int i = 0; i < 6; i++){
     tabuleiro[l][i] = 0;
   }
   return tabuleiro[6][6];
 }
-int limpacoluna(int c, int tabuleiro[6][6]){
+int limpacoluna(int c, int tabuleiro[6][6])
+{
   for (int i = 0; i < 6; i++){
     tabuleiro[i][c] = 0;
   }
   return tabuleiro[6][6];
 }
-bool pontol(int l, int tabuleiro[6][6]){
+bool pontol(int l, int tabuleiro[6][6])
+{
   int sl = 0;
   for (int i = 0; i < 6; i++){
     sl = sl + tabuleiro[l][i];
@@ -43,7 +46,8 @@ bool pontol(int l, int tabuleiro[6][6]){
     return false;
   }
 }
-bool pontoc(int c, int tabuleiro[6][6]){
+bool pontoc(int c, int tabuleiro[6][6])
+{
   int sc = 0;
   for (int i = 0; i < 6; i++){
     sc = sc + tabuleiro[i][c];
@@ -54,7 +58,8 @@ bool pontoc(int c, int tabuleiro[6][6]){
     return false;
   }
 }
-bool verifica(int l, int c, int tabuleiro[6][6], int dado){
+bool verifica(int l, int c, int tabuleiro[6][6], int dado)
+{
   int sl = dado;
   int sc = dado;
   for (int j = 0; j < 6; j++){
