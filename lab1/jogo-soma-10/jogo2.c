@@ -54,6 +54,21 @@ bool pontoc(int c, int tabuleiro[6][6]){
     return false;
   }
 }
+bool verifica(int l, int c, int tabuleiro[6][6], int dado){
+  int sl = dado;
+  int sc = dado;
+  for (int j = 0; j < 6; j++){
+    sl = sl + tabuleiro[l][j];
+  }
+  for (int i = 0; i < 6; i++){
+    sc = sc + tabuleiro[i][c];
+  }
+  if (sl > 10 && sc > 10){
+    return false;
+  }else{
+    return true;
+  }
+}
 int main()
 {
   int i, j, tabuleiro[6][6], l, c, dado, resultado = 0, jc = 0, g = 0;
