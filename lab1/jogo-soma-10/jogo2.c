@@ -32,6 +32,28 @@ int limpacoluna(int c, int tabuleiro[6][6]){
   }
   return tabuleiro[6][6];
 }
+bool pontol(int l, int tabuleiro[6][6]){
+  int sl = 0;
+  for (int i = 0; i < 6; i++){
+    sl = sl + tabuleiro[l][i];
+  }
+  if(sl == 10){
+    return true;
+  }else{
+    return false;
+  }
+}
+bool pontoc(int c, int tabuleiro[6][6]){
+  int sc = 0;
+  for (int i = 0; i < 6; i++){
+    sc = sc + tabuleiro[i][c];
+  }
+  if(sc == 10){
+    return true;
+  }else{
+    return false;
+  }
+}
 int main()
 {
   int i, j, tabuleiro[6][6], l, c, dado, resultado = 0, jc = 0, g = 0;
