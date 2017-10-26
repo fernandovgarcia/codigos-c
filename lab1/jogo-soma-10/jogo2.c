@@ -71,8 +71,8 @@ bool verifica(int l, int c, int tabuleiro[6][6], int dado){
 }
 int main()
 {
-  int i, j, tabuleiro[6][6], l, c, dado, resultado = 0, jc = 0, g = 0;
-  bool v;
+  int i, j, tabuleiro[6][6], l, c, dado, pontuacao = 0,resultado = 0, jc = 0, g = 0;
+  bool v, vc, pl, pc, jp = false;
   for (i = 0; i < 6; i++){
     for (j = 0; j < 6; j++){
       tabuleiro[i][j] = 0;
@@ -85,10 +85,43 @@ int main()
     printf("-----RODADA %d-----\n", o);
     dado = nAleatorio();
     printf("O tabuleiro esta assim:\n");
+    printf("Voce esta com %d pontos\n", pontuacao);
     imprimeTab(tabuleiro);
+    
     printf("O resultado do dado foi: %d\n", dado);
-    printf("Em qual posicao deseja colocar esse valor? ");
-    scanf("%d %d", &l, &c);
-    tabuleiro[l-1][c-1] = dado;
+    for (i = 0; i < 6; i++){
+      for (j = 0; j < 6; j++){
+        if (tabuleiro[i][j] == 0) {
+          jp = verifica(i, j, tabuleiro, dado);
+          if (jp == true) {
+            break;
+          } 
+        }        
+      }
+    }
+    if (jp == true){
+      printf("Em qual posicao deseja colocar esse valor? ");
+      scanf("%d %d", &l, &c);
+      v = verifica(l-1, c-1, tabuleiro, dado);
+      if(v == true && tabuleiro[l-1][c-1] == 0){
+        tabuleiro[l-1][c-1] = dado;
+        pl = pontol(l-1, tabuleiro);
+        pc = pontoc(c-1, tabuleiro);
+        printf("%s", pl ? "true" : "false");
+        if(pl == true && pc == true){
+          pontuacao = pontuacao + 31;
+          tabuleiro[6][6] = limpalinha(l-1, tabuleiro);
+          tabuleiro[6][6] = limpacoluna(c-1, tabuleiro);
+        } else if (pl == true){
+          pontuacao = pontuacao + 10;
+          tabuleiro[6][6] = limpalinha(l-1, tabuleiro);
+        }else if(pc == true){
+          pontuacao = pontuacao + 10;
+          tabuleiro[6][6] = limpacoluna(c-1, tabuleiro);
+        }
+      }else{
+        break;
+      }
+    }      
   }
 }
