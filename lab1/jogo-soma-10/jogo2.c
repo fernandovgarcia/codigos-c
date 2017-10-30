@@ -58,6 +58,21 @@ bool pontoc(int c, int tabuleiro[6][6])
     return false;
   }
 }
+int somac(int c, int tabuleiro[6][6]){
+  int sc = 0;
+  for (int i = 0; i < 6; i++){
+    sc = sc + tabuleiro[i][c];
+  }
+  return sc;
+}
+int somal(int l, int tabuleiro[6][6]){
+  int sl = 0;
+  for (int j = 0; j < 6; j++){
+    sl = sl + tabuleiro[l][j];
+  }  
+  return sl;
+  
+}
 bool verifica(int l, int c, int tabuleiro[6][6], int dado)
 {
   int sl = dado;
@@ -89,6 +104,10 @@ int main()
     g = 0;
     printf("-----RODADA %d-----\n", o);
     dado = nAleatorio();
+    for (i = 0; i < 6; i++){
+      printf("Soma da linha %d e' %d\n", i, somal(i, tabuleiro));
+      printf("Soma da coluna %d e' %d\n", i, somac(i, tabuleiro));
+    }
     printf("O tabuleiro esta assim:\n");
     printf("Voce esta com %d pontos\n", pontuacao);
     imprimeTab(tabuleiro);
@@ -112,7 +131,6 @@ int main()
         tabuleiro[l-1][c-1] = dado;
         pl = pontol(l-1, tabuleiro);
         pc = pontoc(c-1, tabuleiro);
-        printf("%s", pl ? "true" : "false");
         if(pl == true && pc == true){
           pontuacao = pontuacao + 31;
           tabuleiro[6][6] = limpalinha(l-1, tabuleiro);
@@ -128,5 +146,6 @@ int main()
         break;
       }
     }      
+    o++;
   }
 }
