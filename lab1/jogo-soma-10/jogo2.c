@@ -83,7 +83,7 @@ bool verifica(int l, int c, int tabuleiro[6][6], int dado)
   for (int i = 0; i < 6; i++){
     sc = sc + tabuleiro[i][c];
   }
-  if (sl > 10 && sc > 10){
+  if (sl > 10 || sc > 10){
     return false;
   }else{
     return true;
@@ -105,8 +105,8 @@ int main()
     printf("-----RODADA %d-----\n", o);
     dado = nAleatorio();
     for (i = 0; i < 6; i++){
-      printf("Soma da linha %d e' %d\n", i, somal(i, tabuleiro));
-      printf("Soma da coluna %d e' %d\n", i, somac(i, tabuleiro));
+      printf("Soma da linha %d e' %d\n", i+1, somal(i, tabuleiro));
+      printf("Soma da coluna %d e' %d\n", i+1, somac(i, tabuleiro));
     }
     printf("O tabuleiro esta assim:\n");
     printf("Voce esta com %d pontos\n", pontuacao);
@@ -119,33 +119,44 @@ int main()
           jp = verifica(i, j, tabuleiro, dado);
           if (jp == true) {
             break;
-          } 
-        }        
+          }
+        }
       }
     }
     if (jp == true){
-      printf("Em qual posicao deseja colocar esse valor? ");
+      printf("Em qual posicao deseja colocar esse valor (exemplo: 1 1)? ");
       scanf("%d %d", &l, &c);
-      v = verifica(l-1, c-1, tabuleiro, dado);
-      if(v == true && tabuleiro[l-1][c-1] == 0){
-        tabuleiro[l-1][c-1] = dado;
-        pl = pontol(l-1, tabuleiro);
-        pc = pontoc(c-1, tabuleiro);
-        if(pl == true && pc == true){
-          pontuacao = pontuacao + 31;
-          tabuleiro[6][6] = limpalinha(l-1, tabuleiro);
-          tabuleiro[6][6] = limpacoluna(c-1, tabuleiro);
-        } else if (pl == true){
-          pontuacao = pontuacao + 10;
-          tabuleiro[6][6] = limpalinha(l-1, tabuleiro);
-        }else if(pc == true){
-          pontuacao = pontuacao + 10;
-          tabuleiro[6][6] = limpacoluna(c-1, tabuleiro);
-        }
-      }else{
-        break;
+      while (!(l-1 >= 0 && l-1 <= 5) || !(c-1 >= 0 && c-1 <= 6)) {
+        printf("Posicao invalida, tente novamente: ");
+        scanf("%d %d", &l, &c);
       }
-    }      
+      while(tabuleiro[l-1][c-1] != 0){
+        printf("Posicao invalida, tente novamente: ");
+        scanf("%d %d", &l, &c);
+      }
+      v = verifica(l-1, c-1, tabuleiro, dado);
+      while (v == false){
+        printf("Posicao invalida, tente novamente: ");
+        scanf("%d %d", &l, &c);
+        v = verifica(l-1, c-1, tabuleiro, dado);
+      }
+      tabuleiro[l-1][c-1] = dado;
+      pl = pontol(l-1, tabuleiro);
+      pc = pontoc(c-1, tabuleiro);
+      if(pl == true && pc == true){
+        pontuacao = pontuacao + 31;
+        tabuleiro[6][6] = limpalinha(l-1, tabuleiro);
+        tabuleiro[6][6] = limpacoluna(c-1, tabuleiro);
+      } else if (pl == true){
+        pontuacao = pontuacao + 10;
+        tabuleiro[6][6] = limpalinha(l-1, tabuleiro);
+      }else if(pc == true){
+        pontuacao = pontuacao + 10;
+        tabuleiro[6][6] = limpacoluna(c-1, tabuleiro);
+      }
+    }else{
+      break;
+    }
     o++;
   }
 }
