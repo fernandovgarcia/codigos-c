@@ -74,6 +74,7 @@ struct no_turmas{
   struct no_prof_turma *primeiro_prof;
   int codigo;
   int n_alunos;
+  int disc;
   struct no_turmas *proximo;
   struct no_aluno_turma *ultimo_aluno;
   struct no_prof_turma *ultimo_prof;
@@ -85,18 +86,19 @@ struct lista_turmas{
   struct no_turmas *fim;
 };
 
-struct no_avaliacoes{
-  int matricula;
-  float nota1;
-  float nota2;
-  struct no_avaliacoes *proximo;
-};
-
-struct lista_avaliacoes{
-  struct no_avaliacoes *inicio;
-  int cnt;
-  struct no_avaliacoes *fim;
-};
+struct no_avaliacoes{ 
+  int matricula; 
+  int turma;
+  float nota1; 
+  float nota2; 
+  struct no_avaliacoes *proximo; 
+}; 
+ 
+struct lista_avaliacoes{ 
+  struct no_avaliacoes *inicio; 
+  int cnt; 
+  struct no_avaliacoes *fim; 
+}; 
 
 struct no_faltas{
   int matricula;
@@ -518,7 +520,7 @@ int remove_disc_ultimo(struct lista_discs *lista) {
   return -1;
 }
 
-int remove_disc_indice(struct lista_discs *lista,int indice) {
+int remove_disc_indice(struct lista_discs *lista, struct lista_turmas *l_turmas, int indice) {
   if (esta_vazia_disc(lista) == 1) {
     printf("A lista esta vazia\n");
     return -1;
@@ -902,6 +904,9 @@ int desmatricula_aluno(struct lista_turmas *lista, int matricula, int turma){
 
 //VERIFICA SE EXISTE
 int existe_aluno(struct lista_alunos *lista, int matricula){
+  if(lista->inicio == NULL){
+    return 0;
+  }
   if(lista->inicio->matricula == matricula){
     return 1;
   }else if(lista->fim->matricula == matricula){
@@ -919,7 +924,31 @@ int existe_aluno(struct lista_alunos *lista, int matricula){
   return 0;
 }
 
+int existe_profs(struct lista_profs *lista, int siape){
+  if(lista->inicio == NULL){
+    return 0;
+  }
+  if(lista->inicio->siape == siape){
+    return 1;
+  }else if(lista->fim->siape == siape){
+    return 1;
+  }else{
+    struct no_profs *aux = lista->inicio;
+    while(aux != NULL){
+      if(aux->siape == siape){
+        return 1;
+      }
+      aux = aux->proximo;
+    }
+    return 0;
+  }
+  return 0;
+}
+
 int existe_curso(struct lista_cursos *lista, char nome[]){
+  if(lista->inicio == NULL){
+    return 0;
+  }
   if(strcmp(lista->inicio->nome,nome) == 0){
     return 1;
   }else if(strcmp(lista->fim->nome, nome) == 0){
@@ -938,6 +967,9 @@ int existe_curso(struct lista_cursos *lista, char nome[]){
 }
 
 int existe_aula(struct lista_aulas *lista, int id){
+  if(lista->inicio == NULL){
+    return 0;
+  }
   if(lista->inicio->id == id){
     return 1;
   }else if(lista->fim->id == id){
@@ -945,7 +977,30 @@ int existe_aula(struct lista_aulas *lista, int id){
   }else{
     struct no_aulas *aux = lista->inicio;
     while(aux != NULL){
+      printf("entrou while da aula %d\n", aux->id);
       if(aux->id == id){
+        printf("entrou if\n");
+        return 1;
+      }
+      aux = aux->proximo;
+    }
+    return 0;
+  }
+  return 0;
+}
+
+int   existe_disc(struct lista_discs *lista, int id){
+  if(lista->inicio == NULL){
+    return 0;
+  }
+  if(lista->inicio->codigo == id){
+    return 1;
+  }else if(lista->fim->codigo == id){
+    return 1;
+  }else{
+    struct no_discs *aux = lista->inicio;
+    while(aux != NULL){
+      if(aux->codigo == id){
         return 1;
       }
       aux = aux->proximo;
@@ -991,23 +1046,6 @@ bool verifica_aprovacao(struct lista_avaliacoes *lista, int matricula){
   }
 }
 
-bool verifica_reprovacao_falta(struct lista_discs *l_discs, struct lista_aulas *l_aulas, int matricula, int disc){
-  struct no_aulas *aux_aula = l_aulas->inicio;
-  struct no_discs *aux_disc = l_discs->inicio;
-  int ch;
-  while(aux_disc != NULL){
-    if(aux_disc->codigo == disc){
-      ch = aux_disc->ch;
-    }
-    aux_disc = aux_disc->proximo;
-  }
-  while(aux_aula != NULL){
-    if(aux_aula->){
-
-    }
-  }
-}
-
 //INSERE ALUNOS
 void insere_alunos_lista_nula(struct lista_alunos *lista, char curso[], char nome[], int matricula) {
   lista->inicio = malloc(sizeof(struct no_alunos));
@@ -1025,7 +1063,6 @@ void insere_alunos_inicio(struct lista_alunos *lista, char curso[], char nome[],
   } else {
     struct no_alunos *novo = malloc(sizeof(struct no_alunos));
     strcpy(novo->nome, nome);
-    // novo->nome = nome;
     strcpy(novo->curso, curso);
     novo->matricula = matricula;
     novo->proximo = lista->inicio;
@@ -1114,9 +1151,10 @@ void insere_cursos_inicio(struct lista_cursos *lista, char nome[], int codigo) {
 }
 
 //INSERE TURMAS
-void insere_turmas_lista_nula(struct lista_turmas *lista, int codigo) {
+void insere_turmas_lista_nula(struct lista_turmas *lista, int codigo, int disc) {
   lista->inicio = malloc(sizeof(struct no_turmas));
   lista->inicio->codigo = codigo;
+  lista->inicio->disc = disc;
   lista->inicio->n_alunos = 0;
   lista->inicio->proximo = NULL;
   lista->inicio->primeiro_aluno = NULL;
@@ -1125,12 +1163,13 @@ void insere_turmas_lista_nula(struct lista_turmas *lista, int codigo) {
   lista->fim = lista->inicio;
 }
 
-void insere_turmas_inicio(struct lista_turmas *lista, int codigo) {
+void insere_turmas_inicio(struct lista_turmas *lista, int codigo, int disc) {
   if (esta_vazia_turma(lista)==1) {
-    insere_turmas_lista_nula(lista, codigo);
+    insere_turmas_lista_nula(lista, codigo, disc);
   } else {
     struct no_turmas *novo = malloc(sizeof(struct no_turmas));
     novo->codigo = codigo;
+    lista->inicio->disc = disc;
     lista->inicio->n_alunos = 0;
     lista->inicio->primeiro_aluno = NULL;
     lista->inicio->ultimo_aluno = NULL;
@@ -1141,24 +1180,26 @@ void insere_turmas_inicio(struct lista_turmas *lista, int codigo) {
 }
 
 //INSERE AVALIACOES
-void insere_avaliacoes_lista_nula(struct lista_avaliacoes *lista, int matricula, float nota1, float nota2) {
+void insere_avaliacoes_lista_nula(struct lista_avaliacoes *lista, int matricula, float nota1, float nota2, int turma) {
   lista->inicio = malloc(sizeof(struct no_avaliacoes));
   lista->inicio->matricula = matricula;
   lista->inicio->nota1 = nota1;
   lista->inicio->nota2 = nota2;
+  lista->inicio->turma = turma;
   lista->inicio->proximo = NULL;
   lista->cnt = 1;
   lista->fim = lista->inicio;
 }
 
-void insere_avaliacoes_inicio(struct lista_avaliacoes *lista, int matricula, float nota1, float nota2) {
+void insere_avaliacoes_inicio(struct lista_avaliacoes *lista, int matricula, float nota1, float nota2, int turma) {
   if (esta_vazia_avaliacao(lista)==1) {
-    insere_avaliacoes_lista_nula(lista, matricula, nota1, nota2);
+    insere_avaliacoes_lista_nula(lista, matricula, nota1, nota2, turma);
   } else {
     struct no_avaliacoes *novo = malloc(sizeof(struct no_avaliacoes));
     novo->matricula = matricula;
     novo->nota1 = nota1;
     novo->nota2 = nota2;
+    novo->turma = turma;
     novo->proximo = lista->inicio;
     lista->inicio = novo;
     lista->cnt++;
@@ -1383,10 +1424,9 @@ void le_alunos(struct lista_alunos *lista, struct lista_cursos *l_cursos){
   printf("Curso do aluno: ");
   fgets(curso, 50, stdin);
   tira_enter_do_final(curso);
-  while(existe_curso(l_cursos, curso) == 0){
-    printf("Curso nao existe, digite outro curso: \n");
-    fgets(curso, 50, stdin);
-    tira_enter_do_final(curso);
+  if(existe_curso(l_cursos, curso) == 0){
+    printf("Curso nao existe\n");
+    return;
   }
   insere_alunos_inicio(lista, curso, nome, matricula);
 }
@@ -1410,7 +1450,7 @@ void le_profs(struct lista_profs *lista){
   insere_profs_inicio(lista, titulacao, area, nome, siape);
 }
 
-void le_discs(struct lista_discs *lista){
+void le_discs(struct lista_discs *lista, struct lista_cursos *l_cursos){
   char nome[50], curso[50], pre_requisito[50];
   int codigo, ch;
   printf("Codigo da disciplina: ");
@@ -1427,22 +1467,33 @@ void le_discs(struct lista_discs *lista){
   printf("Curso da disciplina: ");
   fgets(curso, 50, stdin);
   tira_enter_do_final(curso);
-
+  if(existe_curso(l_cursos, curso) == 0){
+    printf("Curso nao existe\n");
+    return;
+  }
   insere_discs_inicio(lista, curso, pre_requisito, nome, codigo, ch);
 }
 
-void le_turmas(struct lista_turmas *lista){
-  int codigo;
+void le_turmas(struct lista_turmas *lista, struct lista_discs *l_discs){
+  int codigo, disc;
   printf("Codigo da turma: ");
   scanf("%d", &codigo);
-  insere_turmas_inicio(lista, codigo);
+  printf("Codigo da disciplina: ");
+  scanf("%d", &disc);
+  if(existe_disc(l_discs, disc) == 0){
+    printf("Disciplina nao existe");
+    return;
+  }
+  insere_turmas_inicio(lista, codigo, disc);
 }
 
 void le_avaliacoes(struct lista_avaliacoes *lista, struct lista_turmas *l_turmas){
   float nota1, nota2;
-  int matricula;
+  int matricula, turma;
   printf("Matricula do aluno: ");
   scanf("%d", &matricula);
+  printf("Turma que a avaliacao foi aplicada: ");
+  scanf("%d", &turma);
   printf("Primeira nota tirada: ");
   scanf("%f", &nota1);
   printf("Segunda nota tirada: ");
@@ -1450,8 +1501,12 @@ void le_avaliacoes(struct lista_avaliacoes *lista, struct lista_turmas *l_turmas
   if(aluno_turma(l_turmas, matricula) == 0){
     printf("O aluno nao esta matriculado em nenhuma turma\n");
   }else{
-    insere_avaliacoes_inicio(lista, matricula, nota1, nota2);
-    verifica_aprovacao(lista, matricula);
+    if(aluno_turma(l_turmas, matricula) == turma){
+      insere_avaliacoes_inicio(lista, matricula, nota1, nota2, turma);
+      verifica_aprovacao(lista, matricula);
+    }else{
+      printf("O aluno nao esta nessa turma\n");
+    }
   }
 }
 
@@ -1476,20 +1531,24 @@ void le_aulas(struct lista_aulas *lista){
 }
 
 void le_faltas(struct lista_aulas *lista, struct lista_alunos *l_alunos){
-  int matricula, id;
-  printf("Id da aula que voce quer lancar faltas: ");
-  scanf("%d", &id);
-  while(existe_aula(lista, id) == 0){
-    printf("Aula nao cadastrada, tente novamente: ");
+  int matricula, id, outra = 1;
+  while(outra == 1){
+    printf("Id da aula que voce quer lancar faltas: ");
+    scanf("%d", &id);
+    while(existe_aula(lista, id) == 0){
+      printf("Aula nao cadastrada, tente novamente: ");
+      scanf("%d", &matricula);
+    }
+    printf("Matricula do aluno ausente: ");
     scanf("%d", &matricula);
+    while(existe_aluno(l_alunos, matricula) == 0){
+      printf("Aluno nao cadastrado, tente novamente: ");
+      scanf("%d", &matricula);
+    }
+    insere_falta_aulas_inicio(lista, matricula, id);
+    printf("Deseja lancar outra falta? 1-Sim 2-Nao\n");
+    scanf("%d", &outra);
   }
-  printf("Matricula do aluno ausente: ");
-  scanf("%d", &matricula);
-  while(existe_aluno(l_alunos, matricula) == 0){
-    printf("Aluno nao cadastrado, tente novamente: ");
-    scanf("%d", &matricula);
-  }
-  insere_falta_aulas_inicio(lista, matricula, id);
 }
 
 void matricula_aluno(struct lista_turmas *lista, struct lista_alunos *l_alunos){
@@ -1498,19 +1557,23 @@ void matricula_aluno(struct lista_turmas *lista, struct lista_alunos *l_alunos){
   scanf("%d", &codigo);
   printf("Matricula do aluno: ");
   scanf("%d", &matricula);
-  while(existe_aluno(l_alunos, matricula) == 0){
-    printf("Aluno nao cadastrado, tente novamente: ");
-    scanf("%d", &matricula);
+  if(existe_aluno(l_alunos, matricula) == 0){
+    printf("Aluno nao cadastrado");
+    return;
   }
   insere_aluno_turmas_inicio(lista, matricula, codigo);
 }
 
-void prof_turma(struct lista_turmas *lista){
+void prof_turma(struct lista_turmas *lista, struct lista_profs *l_profs){
   int codigo, siape;
   printf("Codigo da turma: ");
   scanf("%d", &codigo);
   printf("Siape do professor: ");
   scanf("%d", &siape);
+  if(existe_profs(l_profs, siape) == 0){
+    printf("Porfessor nao cadastrado\n");
+    return;
+  }
   insere_prof_turmas_inicio(lista, siape, codigo);
 }
 
@@ -1520,6 +1583,9 @@ int busca_aluno(struct lista_alunos *lista){
   printf("Digite a matricula do aluno: ");
   scanf("%d", &matricula);
   int i = 0;
+  if(lista->inicio == NULL){
+    return -1;
+  }
   if(lista->inicio->matricula == matricula){
     return i;
   }else{
@@ -1535,11 +1601,42 @@ int busca_aluno(struct lista_alunos *lista){
   }
 }
 
+void busca_aluno_imprime(struct lista_alunos *lista){
+  int matricula;
+  printf("Digite a matricula do aluno: ");
+  scanf("%d", &matricula);
+  int i = 0;
+  if(lista->inicio == NULL){
+    printf("Nenhum aluno cadastrado\n");
+    return;
+  }
+  if(lista->inicio->matricula == matricula){
+    printf("Matricula: %d  Nome: %s  Curso: %s\n", lista->inicio->matricula, lista->inicio->nome, lista->inicio->curso);
+    i = 1;
+  }else{
+    struct no_alunos *aux = lista->inicio;
+    while(aux != NULL){
+      if(aux->matricula == matricula){
+        printf("Matricula: %d  Nome: %s  Curso: %s\n", aux->matricula, aux->nome, aux->curso);
+        i = 1;
+        break;
+      }
+      aux = aux->proximo;
+    }
+    if(i == 0){
+      printf("Aluno nao existe\n");
+    }
+  }
+}
+
 int busca_prof(struct lista_profs *lista){
   int siape;
   printf("Digite o siape do professor: ");
   scanf("%d", &siape);
   int i = 0;
+  if(lista->inicio == NULL){
+    return -1;
+  }
   if(lista->inicio->siape == siape){
     return i;
   }else{
@@ -1555,11 +1652,42 @@ int busca_prof(struct lista_profs *lista){
   }
 }
 
+void busca_prof_imprime(struct lista_profs *lista){
+  int siape;
+  printf("Digite o siape do professor: ");
+  scanf("%d", &siape);
+  int i = 0;
+  if(lista->inicio == NULL){
+    printf("Nenhum professor cadastrado\n");
+    return;
+  }
+  if(lista->inicio->siape == siape){
+    printf("Siape: %d  Nome: %s  Area: %s  Titulacao: %s\n", lista->inicio->siape, lista->inicio->nome, lista->inicio->area, lista->inicio->titulacao);
+    i = 1;
+  }else{
+    struct no_profs *aux = lista->inicio;
+    while(aux != NULL){
+      if(aux->siape == siape){
+        printf("Siape: %d  Nome: %s  Area: %s  Titulacao: %s\n", aux->siape, aux->nome, aux->area, aux->titulacao);
+        i = 1;
+        break;
+      }
+      aux = aux->proximo;
+    }
+    if(i == 0){
+      printf("Professor nao existe\n");
+    }
+  }
+}
+
 int busca_turma(struct lista_turmas *lista){
   int codigo;
   printf("Digite o codigo da turma: ");
   scanf("%d", &codigo);
   int i = 0;
+  if(lista->inicio == NULL){
+    return -1;
+  }
   if(lista->inicio->codigo == codigo){
     return i;
   }else{
@@ -1575,11 +1703,42 @@ int busca_turma(struct lista_turmas *lista){
   }
 }
 
+void busca_turma_imprime(struct lista_turmas *lista){
+  int codigo;
+  printf("Digite o codigo da turma: ");
+  scanf("%d", &codigo);
+  int i = 0;
+  if(lista->inicio == NULL){
+    printf("Nenhuma turma cadastrada\n");
+    return;
+  }
+  if(lista->inicio->codigo == codigo){
+    printf("Codigo: %d  Numero de alunos: %d  Disciplina: %d\n", lista->inicio->codigo, lista->inicio->n_alunos, lista->inicio->disc);
+    i = 1;
+  }else{
+    struct no_turmas *aux = lista->inicio;
+    while(aux != NULL){
+      if(aux->codigo == codigo){
+        printf("Codigo: %d  Numero de alunos: %d  Disciplina: %d\n", aux->codigo, aux->n_alunos, aux->disc);
+        i = 1;
+        break;
+      }
+      aux = aux->proximo;
+    }
+    if(i == 0){
+      printf("Turma nao existe\n");
+    }
+  }
+}
+
 int busca_disc(struct lista_discs *lista){
   int codigo;
   printf("Digite o codigo da disciplina: ");
   scanf("%d", &codigo);
   int i = 0;
+  if(lista->inicio == NULL){
+    return -1;
+  }
   if(lista->inicio->codigo == codigo){
     return i;
   }else{
@@ -1595,11 +1754,42 @@ int busca_disc(struct lista_discs *lista){
   }
 }
 
+void busca_disc_imprime(struct lista_discs *lista){
+  int codigo;
+  printf("Digite o codigo da disciplina: ");
+  scanf("%d", &codigo);
+  int i = 0;
+  if(lista->inicio == NULL){
+    printf("Nenhuma disciplina cadastrada\n");
+    return;
+  }
+  if(lista->inicio->codigo == codigo){
+    printf("Codigo: %d  Nome: %s  Carga horaria: %d  Pre-requisito: %s  Curso: %s\n", lista->inicio->codigo, lista->inicio->nome, lista->inicio->ch, lista->inicio->pre_requisito, lista->inicio->curso);
+    i = 1;
+  }else{
+    struct no_discs *aux = lista->inicio;
+    while(aux != NULL){
+      if(aux->codigo == codigo){
+        printf("Codigo: %d  Nome: %s  Carga horaria: %d  Pre-requisito: %s  Curso: %s\n", aux->codigo, aux->nome, aux->ch, aux->pre_requisito, aux->curso);
+        i = 1;
+        break;
+      }
+      aux = aux->proximo;
+    }
+    if(i == 0){
+      printf("Turma nao existe\n");
+    }
+  }
+}
+
 int busca_curso(struct lista_cursos *lista){
   int codigo;
   printf("Digite o codigo do curso: ");
   scanf("%d", &codigo);
   int i = 0;
+  if(lista->inicio == NULL){
+    return -1;
+  }
   if(lista->inicio->codigo == codigo){
     return i;
   }else{
@@ -1615,11 +1805,42 @@ int busca_curso(struct lista_cursos *lista){
   }
 }
 
+void busca_curso_imprime(struct lista_cursos *lista){
+  int codigo;
+  printf("Digite o codigo do curso: ");
+  scanf("%d", &codigo);
+  int i = 0;
+  if(lista->inicio == NULL){
+    printf("Nenhum curso cadastrado\n");
+    return;
+  }
+  if(lista->inicio->codigo == codigo){
+    printf("Codigo: %d  Nome: %s\n", lista->inicio->codigo, lista->inicio->nome);
+    i = 1;
+  }else{
+    struct no_cursos *aux = lista->inicio;
+    while(aux != NULL){
+      if(aux->codigo == codigo){
+        printf("Codigo: %d  Nome: %s\n", aux->codigo, aux->nome);
+        i = 1;
+        break;
+      }
+      aux = aux->proximo;
+    }
+    if(i == 0){
+      printf("Curso nao existe\n");
+    }
+  }
+}
+
 int busca_avaliacao(struct lista_avaliacoes *lista){
   int matricula;
   printf("Digite a matricula do aluno: ");
   scanf("%d", &matricula);
   int i = 0;
+  if(lista->inicio == NULL){
+    return -1;
+  }
   if(lista->inicio->matricula == matricula){
     return i;
   }else{
@@ -1635,18 +1856,87 @@ int busca_avaliacao(struct lista_avaliacoes *lista){
   }
 }
 
-void gera_relatorio(struct lista_avaliacoes *l_avaliacoes, struct lista_turmas *l_turmas, struct lista_alunos *l_alunos){
+int busca_avaliacao_by_turma_by_aluno(struct lista_avaliacoes *lista, int matricula, int turma){
+  int i = 0;
+  // if(lista->inicio->matricula == matricula && lista->inicio->turma == turma){
+  //   printf("    Nota 1: %f  Nota 2: %f\n", lista->inicio->nota1, lista->inicio->nota2);
+  //   if((lista->inicio->nota1+lista->inicio->nota2)/2.0 >= 7.0){
+  //     printf("    Situacao: aprovado por nota\n");          
+  //   }else{
+  //     printf("    Situacao: reprovado por nota\n");
+  //   }
+  // }else{
+    struct no_avaliacoes *aux = lista->inicio;
+    while(aux != NULL){
+      if(aux->matricula == matricula && aux->turma == turma){
+        printf("    Nota 1: %f  Nota 2: %f\n", aux->nota1, aux->nota2);
+        if((aux->nota1+aux->nota2)/2.0 >= 7.0){
+          printf("    Situacao: aprovado por nota\n");     
+          return 1;     
+        }else{
+          printf("    Situacao: reprovado por nota\n");
+          return 1;
+        }
+      }
+      i++;
+      aux = aux->proximo;
+    }
+    return -1;
+  // }
+}
+
+void gera_relatorio(struct lista_avaliacoes *l_avaliacoes, struct lista_turmas *l_turmas, struct lista_alunos *l_alunos, struct lista_aulas *l_aulas, struct lista_discs *l_discs){
   struct no_avaliacoes *aux_avaliacao = l_avaliacoes->inicio;
   struct no_turmas *aux_turma = l_turmas->inicio;
-  struct no_alunos *aux_aluno = l_alunos->inicio;
-  if(esta_vazia_aluno(l_alunos) == 1){
-    printf("Nenhum aluno cadastrado\n");
+  struct no_aulas *aux_aula = l_aulas->inicio;
+  struct no_discs *aux_disc = l_discs->inicio;
+  struct no_aluno_turma *aux_aluno;
+  struct no_faltas *aux_falta;
+  int cont_faltas = 0;
+  if(esta_vazia_turma(l_turmas) == 1){
+    printf("Nenhuma turma cadastrada\n");
   }else{
-    while(aux_aluno != NULL){
-      printf("Matricula: %d   Nome: %s", aux_aluno->matricula, aux_aluno->nome);
-      printf("   Situacao: ");
-      verifica_aprovacao(l_avaliacoes, aux_aluno->matricula);
-      aux_aluno = aux_aluno->proximo;
+    while(aux_turma != NULL){
+      //IMPRIME A TURMA
+      printf("TURMA %d\n", aux_turma->codigo);
+      aux_aluno = aux_turma->primeiro_aluno; 
+      if(aux_aluno == NULL){
+        printf("  A turma nao tem alunos matriculados.\n");
+      }else{
+        //PERCORRE ALUNOS
+        while(aux_aluno != NULL){
+          printf("  Aluno: %d\n", aux_aluno->matricula);
+          while(aux_aula != NULL){
+            aux_falta = aux_aula->primeira_falta;
+            if(aux_aula->turma == aux_turma->codigo){
+              printf("AAAAAAAAAAAAAAAAA\n");
+              while(aux_falta != NULL){
+                printf("BBBBBBBBBBBBB\n");
+                if(aux_falta->matricula == aux_aluno->matricula){
+                  cont_faltas++;
+                }
+                aux_falta = aux_falta->proximo;
+              }
+            }
+            aux_aula = aux_aula->proximo;
+          }
+          while(aux_disc != NULL){
+            if(aux_disc->codigo == aux_turma->disc){
+              printf("  carga horaria: %d   faltas: %d\n", aux_disc->ch, cont_faltas);
+              if(aux_disc->ch*0.3 > cont_faltas){
+                printf("  O aluno tem as presencas necessarias\n");
+              }else{
+                printf("  Aluno reprovado por frequencia\n");
+              }
+            }
+            aux_disc = aux_disc->proximo;
+          }
+          busca_avaliacao_by_turma_by_aluno(l_avaliacoes, aux_aluno->matricula, aux_turma->codigo);
+          aux_aula = l_aulas->inicio;
+          aux_aluno = aux_aluno->proximo_aluno;
+        }
+      }
+      aux_turma = aux_turma->proximo;
     }
   }
 }
@@ -1745,7 +2035,7 @@ int main() {
 
   int op = menu();
   int cadastro, delete, indice_delete, busca, matricula, cod_turma, falta;
-  while(op != 8){
+  while(op != 9){
     switch(op){
       case 1:
         cadastro = menu_cadastro();
@@ -1757,10 +2047,10 @@ int main() {
             le_profs(&l_profs);
           break;
           case 3:
-            le_turmas(&l_turmas);
+            le_turmas(&l_turmas, &l_discs);
           break;
           case 4:
-            le_discs(&l_discs);
+            le_discs(&l_discs, &l_cursos);
           break;
           case 5:
             le_cursos(&l_cursos);
@@ -1806,7 +2096,7 @@ int main() {
           case 4:
             indice_delete = busca_disc(&l_discs);
             if(indice_delete >= 0){
-              remove_disc_indice(&l_discs, indice_delete);  
+              remove_disc_indice(&l_discs, &l_turmas, indice_delete);  
               printf("Disciplina removida com sucesso!\n");
             }else{
               printf("Disciplina nao cadastrada\n");
@@ -1837,19 +2127,19 @@ int main() {
         busca = menu_busca();
         switch(busca){
           case 1:
-            busca_aluno(&l_alunos);
+            busca_aluno_imprime(&l_alunos);
           break;
           case 2:
-            busca_prof(&l_profs);
+            busca_prof_imprime(&l_profs);
           break;
           case 3:
-            busca_turma(&l_turmas);
+            busca_turma_imprime(&l_turmas);
           break;
           case 4:
-            busca_disc(&l_discs);
+            busca_disc_imprime(&l_discs);
           break;
           case 5:
-            busca_curso(&l_cursos);
+            busca_curso_imprime(&l_cursos);
           break;
           case 6:
             busca_avaliacao(&l_avaliacoes);
@@ -1866,7 +2156,7 @@ int main() {
         op = menu();
       break;
       case 6:
-        prof_turma(&l_turmas);
+        prof_turma(&l_turmas, &l_profs);
         op = menu();
       break;
       case 7:
@@ -1879,7 +2169,7 @@ int main() {
         op = menu();
       break;
       case 8:
-        gera_relatorio(&l_avaliacoes, &l_turmas, &l_alunos); 
+        gera_relatorio(&l_avaliacoes, &l_turmas, &l_alunos, &l_aulas, &l_discs); 
         op = menu();
       break;
       case 9:
@@ -1887,22 +2177,5 @@ int main() {
       break;
     }
   }
-  // matricula_aluno(&l_turmas);
-  // insere_inicio(&l_alunos,30);
-  printf("----------------------------\n");
-  imprime_lista_curso(&l_cursos);
-  printf("----------------------------\n");
-   indice_delete = busca_curso(&l_cursos);
-          if(indice_delete >= 0){
-            remove_curso_indice(&l_cursos, indice_delete);  
-          }else{
-            printf("Curso nao cadastrado\n");
-          }
-  // printf("%d\n", existe_aluno(&l_alunos, 1234));
-  // remove_aluno_indice(&l_alunos, 0);
-  printf("----------------------------\n");
-  imprime_lista_curso(&l_cursos);
-  printf("----------------------------\n");
-
   return 0;
 }
