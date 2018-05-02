@@ -118,7 +118,7 @@ arvore *insere_ordenado(int valor, arvore *a){
         novo->dir = NULL;
         return novo;
       }else{
-        insere_ordenado(valor, a->esq);
+        return insere_ordenado(valor, a->esq);
       }
     }else if(valor > a->valor){
       if(a->dir == NULL){
@@ -129,7 +129,7 @@ arvore *insere_ordenado(int valor, arvore *a){
         novo->dir = NULL;
         return novo;
       }else{
-        insere_ordenado(valor, a->dir);
+        return insere_ordenado(valor, a->dir);
       }
     }
   // }
@@ -166,7 +166,7 @@ void main(){
 
   // printf("%d\n", sao_iguais(raiz1, raiz2));
 
-  insere_ordenado(3, raiz1);
+  insere_ordenado(16, raiz1);
 
   imprime(raiz1); printf("\n");
 
