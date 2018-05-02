@@ -108,7 +108,7 @@ int sao_iguais(arvore *a, arvore *b){
 }
 
 arvore *insere_ordenado(int valor, arvore *a){
-  while(a != NULL){
+  // while(a != NULL){
     if(valor < a->valor){
       if(a->esq == NULL){
         arvore *novo = malloc(sizeof(arvore));
@@ -118,7 +118,7 @@ arvore *insere_ordenado(int valor, arvore *a){
         novo->dir = NULL;
         return novo;
       }else{
-        a = a->esq;
+        insere_ordenado(valor, a->esq);
       }
     }else if(valor > a->valor){
       if(a->dir == NULL){
@@ -129,10 +129,10 @@ arvore *insere_ordenado(int valor, arvore *a){
         novo->dir = NULL;
         return novo;
       }else{
-        a = a->dir;
+        insere_ordenado(valor, a->dir);
       }
     }
-  }
+  // }
 }
 
 void main(){
@@ -166,7 +166,7 @@ void main(){
 
   // printf("%d\n", sao_iguais(raiz1, raiz2));
 
-  insere_ordenado(16, raiz1);
+  insere_ordenado(3, raiz1);
 
   imprime(raiz1); printf("\n");
 
