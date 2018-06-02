@@ -32,9 +32,16 @@ struct no_ano {
   struct no_ano *dir;
 };
 
+struct no_placa {
+  struct carro *carro;
+  struct no_placa *esq;
+  struct no_placa *dir;
+};
+
 typedef struct carro obj;
 typedef struct no_marca arv_marca;
 typedef struct no_ano arv_ano ;
+typedef struct no_placa arv_placa;
 
 arv_marca  *cria_arv_marca_vazia();
 arv_marca  *cria_arv_marca (struct carro *carro, arv_marca  *sae, arv_marca  *sad);
@@ -55,6 +62,16 @@ void imprime_ano(arv_ano  *a);
 int conta_nos_ano(arv_ano  *arv_ano );
 int sao_iguais_ano(arv_ano  *a, arv_ano  *b);
 arv_ano  *insere_ano_ordenado(struct carro *carro, arv_ano  *a);
+
+arv_placa  *cria_arv_placa_vazia();
+arv_placa  *cria_arv_placa (struct carro *carro, arv_placa  *sae, arv_placa  *sad);
+bool esta_vazia_placa(arv_placa  *a);
+arv_placa  *desaloca_arv_placa (arv_placa  *a);
+int existe_valor_placa(struct carro *carro, arv_placa  *a);
+void imprime_placa(arv_placa  *a);
+int conta_nos_placa(arv_placa  *arv_placa );
+int sao_iguais_placa(arv_placa  *a, arv_placa  *b);
+arv_placa  *insere_placa_ordenado(struct carro *carro, arv_placa  *a);
 
 void tira_enter_do_final(char s[]){
   int p = strlen(s)-1;
@@ -261,6 +278,138 @@ arv_ano  *insere_ano_ordenado(struct carro *carro, arv_ano *a){
       }    
     }
     return a;
+}
+/////////////////////////////
+
+//FUNÇOES PARA ARVORE DE PLACA
+arv_placa  *cria_arv_placa_vazia(){
+  return NULL;
+}
+
+bool esta_vazia_placa(arv_placa  *a){
+  return a==NULL;
+}
+
+void imprime_placa(arv_placa  *a){
+  if (!esta_vazia_placa(a)){
+    imprime_placa(a->esq);
+    printf("%s\n", a->carro->placa);
+    imprime_placa(a->dir);
+  }
+}
+
+arv_placa  *cria_arv_placa (struct carro *carro, arv_placa  *sae, arv_placa  *sad){
+	arv_placa  *novo = malloc(sizeof(arv_placa ));
+	novo->carro = carro;
+	novo->esq = sae;
+	novo->dir = sad;
+	return novo;
+}
+
+arv_placa  *desaloca_arv_placa (arv_placa  *a){
+	if (!esta_vazia_placa(a)){
+    	desaloca_arv_placa (a->esq);
+    	desaloca_arv_placa (a->dir);
+  		free(a);
+  	}
+	return NULL;
+}
+
+int existe_valor_placa(struct carro *carro, arv_placa  *a){
+	int aux;
+	if (!esta_vazia_placa(a)){
+		if(strcmp(a->carro->placa, carro->placa) == 0){
+			return 1;
+		}
+   	if(existe_valor_placa(carro, a->esq) == 1){
+   		return 1;
+   	}
+   	return existe_valor_placa(carro, a->dir);
+  }
+  return 0;
+}
+
+int existe_valor_placa_busca(char placa[], arv_placa *a){
+	int aux;
+	if (!esta_vazia_placa(a)){
+		if(strcmp(a->carro->placa, placa) == 0){
+      printf("Placa: %s   Marca: %s   Ano: %i \n", a->carro->placa, a->carro->marca, a->carro->ano);
+			return 1;
+		}
+    if(existe_valor_placa_busca(placa, a->esq) == 1){
+      return 1;
+    }
+    return existe_valor_placa_busca(placa, a->dir);
+  }
+  return 0;
+}
+
+void busca_valor_placa(arv_placa *a){
+	int aux;
+  char placa[10];
+  getchar();
+  printf("Digite a placa do carro que voce busca:");
+  fgets(placa, 10, stdin);
+  tira_enter_do_final(placa);
+  if(existe_valor_placa_busca(placa, a) == 0){
+    printf("Carro nao cadastrado\n");
+  }
+}
+
+int conta_nos_placa(arv_placa  *a){
+  int cont = 0;
+  if (!esta_vazia_placa(a)){
+    cont += 1;
+    cont += conta_nos_placa(a->esq);
+    cont += conta_nos_placa(a->dir);  
+  }else{
+    return cont;
+  }
+  return cont;
+}
+
+int sao_iguais_placa(arv_placa  *a, arv_placa  *b){
+  if(esta_vazia_placa(a) && esta_vazia_placa(b)){
+    return 1;
+  }
+  if(esta_vazia_placa(a) && !esta_vazia_placa(b)){
+    return 0;
+  }
+  if(!esta_vazia_placa(a) && esta_vazia_placa(b)){
+    return 0;
+  }
+  int cont = 0;
+  if(a->carro->placa == b->carro->placa){
+    cont += 1;
+  }
+  cont += sao_iguais_placa(a->esq, b->esq); 
+  cont += sao_iguais_placa(a->dir, b->dir);  
+  if(cont == 3){
+    return 1;
+  }
+  return 0;
+}
+
+arv_placa  *insere_placa_ordenado(struct carro *carro, arv_placa  *a){
+  if (a == NULL) {
+    a = cria_arv_placa(carro, NULL, NULL);
+  }else{
+    if (strcmp(carro->placa, a->carro->placa) < 0) {
+        a->esq = insere_placa_ordenado(carro, a->esq);
+    } else {
+        a->dir = insere_placa_ordenado(carro, a->dir);
+    }    
+  }
+  return a;
+}
+
+arv_placa *liberar_placa(arv_placa *a){
+   if (!(a)){
+      liberar_placa(a->esq);
+      liberar_placa(a->dir);
+      free(a);
+   }        
+   return NULL;
 }
 /////////////////////////////
 
@@ -503,6 +652,7 @@ int menu_listar(){
 void main(){
     arv_marca *raiz_marca = NULL;
     arv_ano *raiz_ano = NULL;
+    arv_placa *raiz_placa = NULL;
     struct l_descr l_carros;
     inicializa_lista(&l_carros);
     struct carro *jc;
@@ -514,6 +664,7 @@ void main(){
           jc = le_carros(&l_carros);
           raiz_marca = insere_marca_ordenado(jc,raiz_marca);
           raiz_ano = insere_ano_ordenado(jc,raiz_ano);
+          raiz_placa = insere_placa_ordenado(jc,raiz_placa);
           printf("Veiculo cadastrado com sucesso!\n");
           op = menu();
         break;
@@ -535,12 +686,11 @@ void main(){
           }
         break;
         case 3:
+          busca_valor_placa(raiz_placa);
           op = menu();
         break;
       }
     }
-    
-  
     imprime_lista(&l_carros);
     remove_indice(&l_carros, 2);
     imprime_lista(&l_carros);
