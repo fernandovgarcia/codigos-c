@@ -49,8 +49,6 @@ bool esta_vazia_marca(arv_marca  *a);
 arv_marca  *desaloca_arv_marca (arv_marca  *a);
 int existe_valor_marca(struct carro *carro, arv_marca  *a);
 void imprime_marca(arv_marca  *a);
-int conta_nos_marca(arv_marca  *arv_marca );
-int sao_iguais_marca(arv_marca  *a, arv_marca  *b);
 arv_marca  *insere_marca_ordenado(struct carro *carro, arv_marca  *a);
 
 arv_ano  *cria_arv_ano_vazia();
@@ -59,8 +57,6 @@ bool esta_vazia_ano(arv_ano  *a);
 arv_ano  *desaloca_arv_ano (arv_ano  *a);
 int existe_valor_ano(struct carro *carro, arv_ano  *a);
 void imprime_ano(arv_ano  *a);
-int conta_nos_ano(arv_ano  *arv_ano );
-int sao_iguais_ano(arv_ano  *a, arv_ano  *b);
 arv_ano  *insere_ano_ordenado(struct carro *carro, arv_ano  *a);
 
 arv_placa  *cria_arv_placa_vazia();
@@ -69,8 +65,6 @@ bool esta_vazia_placa(arv_placa  *a);
 arv_placa  *desaloca_arv_placa (arv_placa  *a);
 int existe_valor_placa(struct carro *carro, arv_placa  *a);
 void imprime_placa(arv_placa  *a);
-int conta_nos_placa(arv_placa  *arv_placa );
-int sao_iguais_placa(arv_placa  *a, arv_placa  *b);
 arv_placa  *insere_placa_ordenado(struct carro *carro, arv_placa  *a);
 
 void tira_enter_do_final(char s[]){
@@ -128,40 +122,6 @@ int existe_valor_marca(struct carro *carro, arv_marca  *a){
   	return 0;
 }
 
-int conta_nos_marca(arv_marca  *a){
-  int cont = 0;
-  if (!esta_vazia_marca(a)){
-    cont += 1;
-    cont += conta_nos_marca(a->esq);
-    cont += conta_nos_marca(a->dir);  
-  }else{
-    return cont;
-  }
-  return cont;
-}
-
-int sao_iguais_marca(arv_marca  *a, arv_marca  *b){
-  if(esta_vazia_marca(a) && esta_vazia_marca(b)){
-    return 1;
-  }
-  if(esta_vazia_marca(a) && !esta_vazia_marca(b)){
-    return 0;
-  }
-  if(!esta_vazia_marca(a) && esta_vazia_marca(b)){
-    return 0;
-  }
-  int cont = 0;
-  if(a->carro->marca == b->carro->marca){
-    cont += 1;
-  }
-  cont += sao_iguais_marca(a->esq, b->esq); 
-  cont += sao_iguais_marca(a->dir, b->dir);  
-  if(cont == 3){
-    return 1;
-  }
-  return 0;
-}
-
 arv_marca  *insere_marca_ordenado(struct carro *carro, arv_marca  *a){
   if (a == NULL) {
     a = cria_arv_marca(carro, NULL, NULL);
@@ -182,6 +142,39 @@ arv_marca *liberar_marca(arv_marca *a){
       free(a);
    }        
    return NULL;
+}
+
+arv_marca *remove_marca(arv_marca *a, struct carro *carro){
+    if (esta_vazia_marca(a)) 
+       return NULL;
+    if (strcmp(carro->marca, a->carro->marca) < 0)
+       a->esq = remove_marca(a->esq, carro);
+    else if (strcmp(carro->placa, a->carro->placa) > 0)
+       a->dir = remove_marca(a->dir, carro);
+    else{
+         if ((a->esq == NULL) && (a->dir == NULL)){
+            free(a);
+            a = NULL;
+         } else
+         if (a->esq == NULL){
+            arv_marca* t = a;
+            a = a->dir;
+            free(t);           
+         } else
+         if (a->dir == NULL){
+            arv_marca* t = a;
+            a = a->esq;
+            free(t);           
+         } else {
+            arv_marca* f = a->esq;
+            while (f->dir != NULL)
+               f = f->dir;
+            a->carro = f->carro;
+            f->carro = carro;
+            a->esq = remove_marca(a->esq, carro);
+         }
+    }
+    return a; 
 }
 /////////////////////////////
 
@@ -233,40 +226,6 @@ int existe_valor_ano(struct carro *carro, arv_ano  *a){
   	return 0;
 }
 
-int conta_nos_ano(arv_ano  *a){
-  int cont = 0;
-  if (!esta_vazia_ano(a)){
-    cont += 1;
-    cont += conta_nos_ano(a->esq);
-    cont += conta_nos_ano(a->dir);  
-  }else{
-    return cont;
-  }
-  return cont;
-}
-
-int sao_iguais_ano(arv_ano  *a, arv_ano  *b){
-  if(esta_vazia_ano(a) && esta_vazia_ano(b)){
-    return 1;
-  }
-  if(esta_vazia_ano(a) && !esta_vazia_ano(b)){
-    return 0;
-  }
-  if(!esta_vazia_ano(a) && esta_vazia_ano(b)){
-    return 0;
-  }
-  int cont = 0;
-  if(a->carro == b->carro){
-    cont += 1;
-  }
-  cont += sao_iguais_ano(a->esq, b->esq); 
-  cont += sao_iguais_ano(a->dir, b->dir);  
-  if(cont == 3){
-    return 1;
-  }
-  return 0;
-}
-
 arv_ano  *insere_ano_ordenado(struct carro *carro, arv_ano *a){
     if (a == NULL) {
       a = cria_arv_ano(carro, NULL, NULL);
@@ -278,6 +237,39 @@ arv_ano  *insere_ano_ordenado(struct carro *carro, arv_ano *a){
       }    
     }
     return a;
+}
+
+arv_ano *remove_ano(arv_ano *a, struct carro *carro){
+    if (esta_vazia_ano(a)) 
+       return NULL;
+    if (carro->ano < a->carro->ano)
+       a->esq = remove_ano(a->esq, carro);
+    else if (carro->ano > a->carro->ano)
+       a->dir = remove_ano(a->dir, carro);
+    else{
+         if ((a->esq == NULL) && (a->dir == NULL)){
+            free(a);
+            a = NULL;
+         } else
+         if (a->esq == NULL){
+            arv_ano *t = a;
+            a = a->dir;
+            free(t);           
+         } else
+         if (a->dir == NULL){
+            arv_ano *t = a;
+            a = a->esq;
+            free(t);           
+         } else {
+            arv_ano *f = a->esq;
+            while (f->dir != NULL)
+               f = f->dir;
+            a->carro = f->carro;
+            f->carro = carro;
+            a->esq = remove_ano(a->esq, carro);
+         }
+    }
+    return a; 
 }
 /////////////////////////////
 
@@ -368,28 +360,6 @@ int conta_nos_placa(arv_placa  *a){
   return cont;
 }
 
-int sao_iguais_placa(arv_placa  *a, arv_placa  *b){
-  if(esta_vazia_placa(a) && esta_vazia_placa(b)){
-    return 1;
-  }
-  if(esta_vazia_placa(a) && !esta_vazia_placa(b)){
-    return 0;
-  }
-  if(!esta_vazia_placa(a) && esta_vazia_placa(b)){
-    return 0;
-  }
-  int cont = 0;
-  if(a->carro->placa == b->carro->placa){
-    cont += 1;
-  }
-  cont += sao_iguais_placa(a->esq, b->esq); 
-  cont += sao_iguais_placa(a->dir, b->dir);  
-  if(cont == 3){
-    return 1;
-  }
-  return 0;
-}
-
 arv_placa  *insere_placa_ordenado(struct carro *carro, arv_placa  *a){
   if (a == NULL) {
     a = cria_arv_placa(carro, NULL, NULL);
@@ -410,6 +380,39 @@ arv_placa *liberar_placa(arv_placa *a){
       free(a);
    }        
    return NULL;
+}
+
+arv_placa *remove_placa(arv_placa *a, struct carro *carro){
+    if (esta_vazia_placa(a)) 
+       return NULL;
+    if (strcmp(carro->placa, a->carro->placa) < 0)
+       a->esq = remove_placa(a->esq, carro);
+    else if (strcmp(carro->placa, a->carro->placa) > 0)
+       a->dir = remove_placa(a->dir, carro);
+    else{
+         if ((a->esq == NULL) && (a->dir == NULL)){
+            free(a);
+            a = NULL;
+         } else
+         if (a->esq == NULL){
+            arv_placa* t = a;
+            a = a->dir;
+            free(t);           
+         } else
+         if (a->dir == NULL){
+            arv_placa* t = a;
+            a = a->esq;
+            free(t);           
+         } else {
+            arv_placa* f = a->esq;
+            while (f->dir != NULL)
+               f = f->dir;
+            a->carro = f->carro;
+            f->carro = carro;
+            a->esq = remove_placa(a->esq, carro);
+         }
+    }
+    return a; 
 }
 /////////////////////////////
 
@@ -545,6 +548,24 @@ obj *le_carros(struct l_descr *lista){
   return insere_ordenado(lista, ano, placa, marca);
 }
 
+int busca_indice_lista(struct l_descr *lista, obj *carro) {
+  if (esta_vazia(lista) == 1) {
+    printf("A lista esta vazia\n");
+    return -1;
+  } else {
+    int cont = 0;
+    struct no *aux = lista->inicio;
+    while(aux != NULL){
+      if(aux->carro == carro){
+        return cont;
+      }
+      cont++;
+      aux = aux->proximo;
+    }
+  }
+  return -1;
+}
+
 bool remove_primeiro(struct l_descr *lista) {
   if (esta_vazia(lista) == 1) {
     printf("A lista esta vazia\n");
@@ -624,14 +645,42 @@ bool remove_indice(struct l_descr *lista, int indice) {
   return false;
 }
 
+obj *placa_busca_excluir(char placa[], arv_placa *a){
+	int aux;
+	if (!esta_vazia_placa(a)){
+		if(strcmp(a->carro->placa, placa) == 0){
+      return a->carro;
+		}
+    if(placa_busca_excluir(placa, a->esq) != NULL){
+      return a->esq->carro;
+    }
+    return placa_busca_excluir(placa, a->dir);
+  }
+  return NULL;
+}
+
+obj *busca_excluir(arv_placa *a){
+  char placa[10];
+  printf("Digite a placa do veículo a ser excluido: ");
+  getchar();
+  fgets(placa, 10, stdin);
+  tira_enter_do_final(placa);
+  obj *carro = placa_busca_excluir(placa, a);
+  if(carro == NULL){
+    printf("Placa nao cadastrada");
+  }
+  return carro;
+}
+
 int menu(){
   printf("----- MENU ----\n");
   printf("1 - Inserir carro\n");
   printf("2 - Listar carros\n");
   printf("3 - Buscar carro\n");
+  printf("4 - Excluir carro\n");
   int op;
   scanf("%d", &op);
-  while(op > 4 && op <= 0){
+  while(op > 5 && op <= 0){
     scanf("%d", &op);
   }
   return op;
@@ -649,6 +698,7 @@ int menu_listar(){
   }
   return op;
 }
+
 void main(){
     arv_marca *raiz_marca = NULL;
     arv_ano *raiz_ano = NULL;
@@ -656,9 +706,11 @@ void main(){
     struct l_descr l_carros;
     inicializa_lista(&l_carros);
     struct carro *jc;
+    obj *carro = NULL;
     int op = menu();
     int op2;
-    while(op != 4){
+    int indice;
+    while(op != 5){
       switch(op){
         case 1:
           jc = le_carros(&l_carros);
@@ -689,10 +741,20 @@ void main(){
           busca_valor_placa(raiz_placa);
           op = menu();
         break;
+        case 4:
+          carro = busca_excluir(raiz_placa);
+          if(carro != NULL){
+            indice = busca_indice_lista(&l_carros, carro);
+            printf("O INDICE É %d", indice);
+            remove_indice(&l_carros, indice);
+            remove_placa(raiz_placa, carro);
+            remove_marca(raiz_marca, carro);
+            remove_ano(raiz_ano, carro);
+            free(carro);
+          }          
+          op = menu();
+        break;
       }
     }
-    imprime_lista(&l_carros);
-    remove_indice(&l_carros, 2);
-    imprime_lista(&l_carros);
 }
 
