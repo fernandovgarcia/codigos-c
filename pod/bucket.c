@@ -4,8 +4,8 @@
 #include <stdlib.h>
 #include <math.h>
 
-#define tam_bucket 1000000
-#define max 1000000
+#define tam_bucket 100000000
+#define max 100000000
 #define num_bucket 12
 
 typedef struct bucket{
@@ -74,23 +74,24 @@ void insertionSort(int *original, int length) {
     }
 }                                              
           
-void bucket_sort(int* vet, int tam) {
-    int i, j, k, clas;
-    clas = (int) ceill(1 + 3.3 * log10((double) tam));
-    Bucket *b[clas];
-    for (i = 0; i < clas; i++){
+void bucket_sort(int* vet) {
+    int i, j, k;
+    printf("Ordenando vetor...\n");
+    Bucket *b[num_bucket];
+    for (i = 0; i < num_bucket; i++){
         b[i] = malloc(sizeof(Bucket));
         b[i]->topo = 0;
-        b[i]->balde = malloc(sizeof(int) * tam);
+        b[i]->balde = malloc(sizeof(int) * max);
     }
 
-    for(i=0;i<tam;i++){                          
-        j=(clas)-1;
+    for(i=0;i<max;i++){                          
+        j=(num_bucket)-1;
         while(1){
             if(j<0)
                 break;
             if(vet[i]>=j*10){
-                b[j]->balde[b[j]->topo]=vet[i];
+                int aux = b[j]->topo;
+                b[j]->balde[aux]=vet[i];
                 (b[j]->topo)++;
                 break;
             }
@@ -98,40 +99,43 @@ void bucket_sort(int* vet, int tam) {
         }
     }
 
-    for(i=0;i<clas;i++)                     
-        if(b[i]->topo)
+    for(i=0;i<num_bucket;i++){                  
+        if(b[i]->topo){
             heapsort(b[i]->balde, b[i]->topo);
+        }
+    }
 
     i=0;
 
-    for(j=0;j<clas;j++){                   
+    for(j=0;j<num_bucket;j++){                   
         for(k=0;k<b[j]->topo;k++){
             vet[i]=b[j]->balde[k];
             i++;
         }
     }
-
-    for (i = 0; i < tam; ++i){
-        printf("%d\n", vet[i]);
-    }
 }
 
 void main(){
 
-    int v[max];
+    int *v;
     srand(time(NULL));
+    v = malloc(sizeof(int)*max);
     int i;
+    printf("Gerando vetor...\n");
     for (i = 0; i < max; i++){
         v[i] = rand()%max;
     }
 
     clock_t Ticks[2];
     Ticks[0] = clock();
-    bucket_sort(v, max);
-
+    bucket_sort(v);
 
     Ticks[1] = clock();
     double Tempo = (Ticks[1] - Ticks[0]) * 1000.0 / CLOCKS_PER_SEC;
-    printf("Tempo gasto: %g ms.", Tempo);
+    /*for (i = 0; i < max; ++i){
+        printf("%d\n", v[i]);
+    }*/
+    printf("Tempo gasto na ordenacao: %g ms.", Tempo);
+    free(v);
     return ;
 }
