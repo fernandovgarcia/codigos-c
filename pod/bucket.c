@@ -14,7 +14,7 @@ typedef struct bucket{
 }Bucket;
 
 
-void heapsort(int a[], int n) {
+void heapSort(int a[], int n) {
     int i = n / 2, pai, filho, t;
     while(true) {
         if (i > 0) {
@@ -101,7 +101,7 @@ void bucket_sort(int* vet) {
 
     for(i=0;i<num_bucket;i++){                  
         if(b[i]->topo){
-            heapsort(b[i]->balde, b[i]->topo);
+            insertionSort(b[i]->balde, b[i]->topo);
         }
     }
 
@@ -116,15 +116,34 @@ void bucket_sort(int* vet) {
 }
 
 void main(){
+    
+    int i = 0;
+    /*
+    ARQUIVOS DE DADOS GERADOS
+    FILE *as = fopen("terceiro", "w");
+    for (i = 0; i < max; i++){
+        fprintf(as,"%d\n", rand()%max);
+    }
+    fclose(as);
+    */
 
     int *v;
     srand(time(NULL));
     v = malloc(sizeof(int)*max);
-    int i;
     printf("Gerando vetor...\n");
-    for (i = 0; i < max; i++){
-        v[i] = rand()%max;
+    
+    FILE *ae = fopen("terceiro", "r");
+    char lin[10000];
+
+    if(ae == NULL){
+        printf("Nao foi possivel abrir o arquivo\n");
+        return ;
     }
+    while(fgets(lin, 10000, ae) != NULL){
+        v[i] = atoi(lin);
+        i++;
+    }
+    fclose(ae);
 
     clock_t Ticks[2];
     Ticks[0] = clock();
